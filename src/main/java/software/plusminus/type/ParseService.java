@@ -1,6 +1,6 @@
 package software.plusminus.type;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import software.plusminus.type.model.Annotation;
@@ -13,27 +13,29 @@ import software.plusminus.util.FieldUtils;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@AllArgsConstructor
 @Service
 public class ParseService {
 
     private static final ConcurrentMap<Class<?>, Type> CACHE
             = new ConcurrentHashMap<>();
 
-    @Autowired
     private List<FieldParser<? extends Field>> fieldParsers;
 
     public <T> Type parse(Class<T> classValue) {
-        Type type = CACHE.computeIfAbsent(classValue, c -> new Type());
-        if (type.getName() == null) {
-            populateType(classValue, type);
+        Type cached = CACHE.get(classValue);
+        if (cached != null) {
+            return cached;
         }
-        return type;
+        Type type = new Type();
+        populateType(classValue, type);
+        Type existing = CACHE.putIfAbsent(classValue, type);
+        return existing != null ? existing : type;
     }
 
     public Field parseField(JavaField javaField) {
@@ -46,8 +48,10 @@ public class ParseService {
 
     public <T> void populateType(Class<T> classValue, Type type) {
         type.setName(classValue.getSimpleName());
+        type.setAnnotations(toAnnotations(classValue.getAnnotations()));
 
         List<Field> fields = Stream.of(classValue.getDeclaredFields())
+                .filter(field -> !field.isSynthetic())
                 .map(this::toJavaField)
                 .map(javaField -> {
                     Field field = this.parseField(javaField);
@@ -79,7 +83,11 @@ public class ParseService {
     }
 
     private List<Annotation> getAnnotations(JavaField javaField) {
-        return Stream.of(javaField.getAnnotations())
+        return toAnnotations(javaField.getAnnotations());
+    }
+
+    private List<Annotation> toAnnotations(java.lang.annotation.Annotation[] javaAnnotations) {
+        return Stream.of(javaAnnotations)
             .map(a -> {
                 Annotation annotation = new Annotation();
                 annotation.setName(a.annotationType().getSimpleName());
@@ -111,13 +119,20 @@ public class ParseService {
 
     private void populateAnnotationValue(java.lang.annotation.Annotation javaAnnotation,
                                          Annotation annotation) {
-        Optional<java.lang.reflect.Field> valueField = FieldUtils.findFirst(
-                javaAnnotation.getClass(), field -> field.getName().equals("value"));
-        valueField.ifPresent(f -> {
-            Object value = FieldUtils.read(javaAnnotation, f);
+        java.lang.reflect.Method valueMethod;
+        try {
+            valueMethod = javaAnnotation.annotationType().getMethod("value");
+        } catch (NoSuchMethodException e) {
+            // Annotation has no value() element - nothing to populate.
+            return;
+        }
+        try {
+            Object value = valueMethod.invoke(javaAnnotation);
             if (value != null) {
                 annotation.setValue(value.toString());
             }
-        });
+        } catch (IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
+            throw new ParseException("Can't read value() of annotation " + javaAnnotation);
+        }
     }
 }
