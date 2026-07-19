@@ -1,6 +1,6 @@
 package software.plusminus.type;
 
-import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import software.plusminus.type.model.Annotation;
@@ -18,13 +18,18 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@AllArgsConstructor
 @Service
 public class ParseService {
 
     private final ConcurrentMap<Class<?>, Type> cache = new ConcurrentHashMap<>();
 
-    private List<FieldParser<? extends Field>> fieldParsers;
+    private final List<FieldParser<? extends Field>> fieldParsers;
+
+    /* Parsers may recurse back into ParseService (e.g. RelationFieldParser),
+       so the list is injected lazily to avoid a circular bean dependency */
+    public ParseService(@Lazy List<FieldParser<? extends Field>> fieldParsers) {
+        this.fieldParsers = fieldParsers;
+    }
 
     public <T> Type parse(Class<T> classValue) {
         Type cached = cache.get(classValue);
