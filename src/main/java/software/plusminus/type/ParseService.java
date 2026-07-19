@@ -22,19 +22,18 @@ import java.util.stream.Stream;
 @Service
 public class ParseService {
 
-    private static final ConcurrentMap<Class<?>, Type> CACHE
-            = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<?>, Type> cache = new ConcurrentHashMap<>();
 
     private List<FieldParser<? extends Field>> fieldParsers;
 
     public <T> Type parse(Class<T> classValue) {
-        Type cached = CACHE.get(classValue);
+        Type cached = cache.get(classValue);
         if (cached != null) {
             return cached;
         }
         Type type = new Type();
         populateType(classValue, type);
-        Type existing = CACHE.putIfAbsent(classValue, type);
+        Type existing = cache.putIfAbsent(classValue, type);
         return existing != null ? existing : type;
     }
 
@@ -132,7 +131,7 @@ public class ParseService {
                 annotation.setValue(value.toString());
             }
         } catch (IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
-            throw new ParseException("Can't read value() of annotation " + javaAnnotation);
+            throw new ParseException("Can't read value() of annotation " + javaAnnotation, e);
         }
     }
 }

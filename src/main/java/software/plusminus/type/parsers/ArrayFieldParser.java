@@ -1,17 +1,18 @@
 package software.plusminus.type.parsers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import software.plusminus.type.ParseException;
 import software.plusminus.type.ParseService;
 import software.plusminus.type.model.Field;
 import software.plusminus.type.model.JavaField;
 import software.plusminus.type.model.field.ArrayField;
 import software.plusminus.type.model.validation.ArrayValidation;
 
+@AllArgsConstructor
 @Component
 public class ArrayFieldParser implements FieldParser<ArrayField> {
 
-    @Autowired
     private ParseService parseService;
 
     @Override
@@ -34,6 +35,9 @@ public class ArrayFieldParser implements FieldParser<ArrayField> {
             arrayType.setAnnotations(javaField.getAnnotations());
             arrayType.setType(javaField.getType().getComponentType());
             return parseService.parseField(arrayType);
+        }
+        if (javaField.getGeneric() == null) {
+            throw new ParseException("Can't parse iterable field without generic type: " + javaField);
         }
         return parseService.parseField(javaField.getGeneric());
     }
