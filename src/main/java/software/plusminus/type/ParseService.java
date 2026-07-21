@@ -37,9 +37,20 @@ public class ParseService {
             return cached;
         }
         Type type = new Type();
-        populateType(classValue, type);
         Type existing = cache.putIfAbsent(classValue, type);
-        return existing != null ? existing : type;
+        if (existing != null) {
+            return existing;
+        }
+        boolean populated = false;
+        try {
+            populateType(classValue, type);
+            populated = true;
+        } finally {
+            if (!populated) {
+                cache.remove(classValue, type);
+            }
+        }
+        return type;
     }
 
     public Field parseField(JavaField javaField) {
