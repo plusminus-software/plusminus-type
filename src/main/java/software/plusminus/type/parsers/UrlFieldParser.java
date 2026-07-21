@@ -1,5 +1,6 @@
 package software.plusminus.type.parsers;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import software.plusminus.type.model.JavaField;
 import software.plusminus.type.model.field.UrlField;
@@ -8,6 +9,9 @@ import software.plusminus.type.model.validation.UrlValidation;
 import java.net.URL;
 import java.util.stream.Stream;
 
+/* Ordered before the type-driven parsers: a @Url field may be a String,
+   which TextFieldParser would otherwise claim first */
+@Order(0)
 @Component
 public class UrlFieldParser implements FieldParser<UrlField> {
 

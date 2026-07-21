@@ -103,9 +103,14 @@ public class MiscFieldParsersTest {
     }
 
     @Test
-    public void videoParserSupportsNothingYet() {
+    public void videoParserSupportsVideoAnnotationOnly() throws NoSuchFieldException {
         VideoFieldParser parser = new VideoFieldParser();
+        JavaField annotated = javaField(String.class);
+        annotated.setAnnotations(
+                AnnotatedFieldsEntity.class.getDeclaredField("video").getAnnotations());
 
+        assertThat(parser.supports(annotated)).isTrue();
+        assertThat(parser.supports(javaField(String.class))).isFalse();
         assertThat(parser.supports(javaField(File.class))).isFalse();
     }
 

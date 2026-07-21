@@ -11,6 +11,8 @@ public class AnnotatedFieldsEntity {
     private EmbeddableEntity embedded;
     @Url
     private String url;
+    @Video
+    private String video;
     @Lob
     private String lob;
     @TitleField(name = "custom")
