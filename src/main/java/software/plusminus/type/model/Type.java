@@ -31,6 +31,8 @@ public class Type {
 
     public Map<String, Annotation> getAnnotationsMap() {
         return annotations.stream()
-                .collect(Collectors.toMap(Annotation::getName, Function.identity(), (first, second) -> first));
+                .collect(Collectors.toMap(Annotation::getName, Function.identity(), (first, second) -> {
+                    throw new IllegalStateException("Duplicate annotation name: " + first.getName());
+                }));
     }
 }
