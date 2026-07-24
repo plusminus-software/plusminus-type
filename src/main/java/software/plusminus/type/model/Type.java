@@ -31,6 +31,6 @@ public class Type {
 
     public Map<String, Annotation> getAnnotationsMap() {
         return annotations.stream()
-                .collect(Collectors.toMap(Annotation::getName, Function.identity()));
+                .collect(Collectors.toMap(Annotation::getName, Function.identity(), (first, second) -> first));
     }
 }

@@ -24,12 +24,10 @@ public class ParseServiceRecursionTest {
     private ParseService parseService;
 
     @Before
-    public void setUp() throws ReflectiveOperationException {
+    public void setUp() {
         List<FieldParser<? extends Field>> parsers = new ArrayList<>();
         parseService = new ParseService(parsers);
-        RelationFieldParser relationParser = new RelationFieldParser();
-        inject(relationParser, "parseService", parseService);
-        inject(relationParser, "titleFieldService", new TitleFieldService());
+        RelationFieldParser relationParser = new RelationFieldParser(parseService, new TitleFieldService());
         parsers.add(relationParser);
         parsers.add(new TextFieldParser());
         parsers.add(new NumberFieldParser());
@@ -69,13 +67,6 @@ public class ParseServiceRecursionTest {
                 .filter(field -> name.equals(field.getName()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Field not found: " + name));
-    }
-
-    private static void inject(Object target, String fieldName, Object value)
-            throws ReflectiveOperationException {
-        java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(target, value);
     }
 
     private static class UnparsableEntity {
