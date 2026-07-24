@@ -2,6 +2,7 @@ package software.plusminus.type;
 
 import org.junit.Test;
 import software.plusminus.type.helpers.AnnotatedFieldsEntity;
+import software.plusminus.type.helpers.InheritedNameEntity;
 import software.plusminus.type.helpers.NamedFieldEntity;
 import software.plusminus.type.helpers.NotTitledNameEntity;
 import software.plusminus.type.helpers.TitledFieldEntity;
@@ -48,6 +49,15 @@ public class TitleFieldServiceTest {
     @Test
     public void findsTitleFieldByDefaultFieldName() {
         JavaField javaField = javaField(NamedFieldEntity.class);
+
+        String result = titleFieldService.getTitleField(javaField);
+
+        assertThat(result).isEqualTo("name");
+    }
+
+    @Test
+    public void findsTitleFieldOnSuperclassField() {
+        JavaField javaField = javaField(InheritedNameEntity.class);
 
         String result = titleFieldService.getTitleField(javaField);
 

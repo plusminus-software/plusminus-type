@@ -6,6 +6,7 @@ import software.plusminus.type.model.JavaField;
 import software.plusminus.type.model.TitleField;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +52,7 @@ public class TitleFieldService {
     }
 
     private String findOnTypeFields(Class<?> type) {
-        Optional<String> byAnnotation = Stream.of(type.getDeclaredFields())
+        Optional<String> byAnnotation = fields(type)
                 .filter(f -> {
                     TitleField annotation = f.getAnnotation(TitleField.class);
                     return annotation != null && "".equals(annotation.name());
@@ -62,7 +63,7 @@ public class TitleFieldService {
             return byAnnotation.get();
         }
 
-        Optional<String> byName = Stream.of(type.getDeclaredFields())
+        Optional<String> byName = fields(type)
                 .filter(f -> DEFAULT_TITLE_FIELD_NAMES.contains(f.getName()))
                 .filter(f -> Stream.of(f.getAnnotations())
                         .noneMatch(a -> a.annotationType().getSimpleName().equals(NOT_TITLE_FIELD)))
@@ -70,6 +71,15 @@ public class TitleFieldService {
                 .map(Field::getName);
         return byName.orElse(null);
 
+    }
+
+    private Stream<Field> fields(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> current = type; current != null && current != Object.class;
+                current = current.getSuperclass()) {
+            fields.addAll(Arrays.asList(current.getDeclaredFields()));
+        }
+        return fields.stream();
     }
 
 }

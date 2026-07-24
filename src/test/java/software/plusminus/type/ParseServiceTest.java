@@ -63,6 +63,13 @@ public class ParseServiceTest {
     }
 
     @Test
+    public void parseHandlesTypeWithoutPackage() {
+        Type type = parseService.parse(int[].class);
+
+        assertThat(type.getNamespace()).isNull();
+    }
+
+    @Test
     public void parsePopulatesTypeAnnotations() {
         Type type = parseService.parse(ChildEntity.class);
 

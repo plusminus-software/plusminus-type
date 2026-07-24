@@ -22,10 +22,9 @@ public class UuidFieldParser implements FieldParser<UuidField> {
         return uuidField;
     }
 
-    @SuppressWarnings("PMD")
     private UuidValidation getValidation(JavaField javaField) {
         UuidValidation validation = new UuidValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

@@ -29,10 +29,9 @@ public class UrlFieldParser implements FieldParser<UrlField> {
         return urlField;
     }
 
-    @SuppressWarnings("PMD")
     private UrlValidation getValidation(JavaField javaField) {
         UrlValidation validation = new UrlValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

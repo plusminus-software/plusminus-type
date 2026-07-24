@@ -26,10 +26,12 @@ public class TextFieldParser implements FieldParser<TextField> {
         return textField;
     }
 
-    @SuppressWarnings("PMD")
     private TextValidation getValidation(JavaField javaField) {
         TextValidation validation = new TextValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
+        validation.setMin(Validations.sizeMin(javaField));
+        validation.setMax(Validations.sizeMax(javaField));
+        validation.setPattern(Validations.pattern(javaField));
         return validation;
     }
 }

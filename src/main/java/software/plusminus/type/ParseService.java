@@ -1,6 +1,7 @@
 package software.plusminus.type;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import software.plusminus.type.model.Annotation;
@@ -8,11 +9,12 @@ import software.plusminus.type.model.Field;
 import software.plusminus.type.model.JavaField;
 import software.plusminus.type.model.Type;
 import software.plusminus.type.parsers.FieldParser;
-import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -22,6 +24,8 @@ import java.util.stream.Stream;
 public class ParseService {
 
     private final ConcurrentMap<Class<?>, Type> cache = new ConcurrentHashMap<>();
+    private final ThreadLocal<Map<Class<?>, Type>> inProgress =
+            ThreadLocal.withInitial(HashMap::new);
 
     private final List<FieldParser<? extends Field>> fieldParsers;
 
@@ -36,21 +40,23 @@ public class ParseService {
         if (cached != null) {
             return cached;
         }
-        Type type = new Type();
-        Type existing = cache.putIfAbsent(classValue, type);
-        if (existing != null) {
-            return existing;
+        Map<Class<?>, Type> building = inProgress.get();
+        Type inFlight = building.get(classValue);
+        if (inFlight != null) {
+            return inFlight;
         }
-        boolean populated = false;
+        Type type = new Type();
+        building.put(classValue, type);
         try {
             populateType(classValue, type);
-            populated = true;
         } finally {
-            if (!populated) {
-                cache.remove(classValue, type);
+            building.remove(classValue);
+            if (building.isEmpty()) {
+                inProgress.remove();
             }
         }
-        return type;
+        Type published = cache.putIfAbsent(classValue, type);
+        return published != null ? published : type;
     }
 
     public Field parseField(JavaField javaField) {
@@ -85,7 +91,8 @@ public class ParseService {
                 && classValue.getSuperclass() != Object.class) {
             type.setParent(parse(classValue.getSuperclass()));
         }
-        type.setNamespace(classValue.getPackage().getName());
+        Package classPackage = classValue.getPackage();
+        type.setNamespace(classPackage != null ? classPackage.getName() : null);
     }
 
     private JavaField toJavaField(java.lang.reflect.Field field) {
@@ -120,14 +127,21 @@ public class ParseService {
             return null;
         }
 
-        JavaField genericField = new JavaField();
-
-        Class<?> genericType = FieldUtils.getGenericType(field);
-        genericField.setType(genericType);
-
+        int index = Map.class.isAssignableFrom(field.getType()) ? 1 : 0;
         AnnotatedParameterizedType annotatedParameterizedType = (AnnotatedParameterizedType) annotatedType;
+        if (annotatedParameterizedType.getAnnotatedActualTypeArguments().length <= index) {
+            return null;
+        }
+
+        Class<?> genericType = ResolvableType.forField(field).getGeneric(index).resolve();
+        if (genericType == null) {
+            return null;
+        }
+
+        JavaField genericField = new JavaField();
+        genericField.setType(genericType);
         genericField.setAnnotations(
-                annotatedParameterizedType.getAnnotatedActualTypeArguments()[0].getAnnotations());
+                annotatedParameterizedType.getAnnotatedActualTypeArguments()[index].getAnnotations());
 
         return genericField;
     }

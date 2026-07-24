@@ -9,6 +9,8 @@ import software.plusminus.type.model.JavaField;
 import software.plusminus.type.model.field.ArrayField;
 import software.plusminus.type.model.validation.ArrayValidation;
 
+import java.util.Map;
+
 @AllArgsConstructor
 @Component
 public class ArrayFieldParser implements FieldParser<ArrayField> {
@@ -18,7 +20,8 @@ public class ArrayFieldParser implements FieldParser<ArrayField> {
     @Override
     public boolean supports(JavaField javaField) {
         return javaField.getType().isArray()
-                || Iterable.class.isAssignableFrom(javaField.getType());
+                || Iterable.class.isAssignableFrom(javaField.getType())
+                || Map.class.isAssignableFrom(javaField.getType());
     }
 
     @Override
@@ -42,10 +45,11 @@ public class ArrayFieldParser implements FieldParser<ArrayField> {
         return parseService.parseField(javaField.getGeneric());
     }
 
-    @SuppressWarnings("PMD")
     private ArrayValidation getValidation(JavaField javaField) {
         ArrayValidation validation = new ArrayValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
+        validation.setMin(Validations.sizeMin(javaField));
+        validation.setMax(Validations.sizeMax(javaField));
         return validation;
     }
 }

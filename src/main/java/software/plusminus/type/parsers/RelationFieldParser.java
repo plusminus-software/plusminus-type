@@ -1,6 +1,6 @@
 package software.plusminus.type.parsers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import software.plusminus.type.ParseService;
 import software.plusminus.type.TitleFieldService;
@@ -12,14 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+@AllArgsConstructor
 @Component
 public class RelationFieldParser implements FieldParser<RelationField> {
 
     private static final List<String> ANNOTATIONS = Arrays.asList("Entity", "Document", "MappedSuperclass");
 
-    @Autowired
     private ParseService parseService;
-    @Autowired
     private TitleFieldService titleFieldService;
 
     @Override
@@ -37,10 +36,9 @@ public class RelationFieldParser implements FieldParser<RelationField> {
         return relationField;
     }
 
-    @SuppressWarnings("PMD")
     private RelationValidation getValidation(JavaField javaField) {
         RelationValidation validation = new RelationValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

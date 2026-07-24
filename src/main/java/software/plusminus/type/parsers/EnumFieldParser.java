@@ -13,7 +13,7 @@ public class EnumFieldParser implements FieldParser<EnumField> {
 
     @Override
     public boolean supports(JavaField javaField) {
-        return Enum.class.isAssignableFrom(javaField.getType());
+        return javaField.getType().isEnum();
     }
 
     @Override

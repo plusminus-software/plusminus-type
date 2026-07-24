@@ -16,8 +16,8 @@ public class DatetimeFieldParser implements FieldParser<DatetimeField> {
 
     @Override
     public boolean supports(JavaField javaField) {
-        return Stream.of(Date.class, java.sql.Date.class, Instant.class, OffsetDateTime.class, ZonedDateTime.class)
-                .anyMatch(c -> javaField.getType() == c);
+        return Stream.of(Date.class, Instant.class, OffsetDateTime.class, ZonedDateTime.class)
+                .anyMatch(c -> c.isAssignableFrom(javaField.getType()));
     }
 
     @Override
@@ -27,10 +27,9 @@ public class DatetimeFieldParser implements FieldParser<DatetimeField> {
         return datetimeField;
     }
 
-    @SuppressWarnings("PMD")
     private DatetimeValidation getValidation(JavaField javaField) {
         DatetimeValidation validation = new DatetimeValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

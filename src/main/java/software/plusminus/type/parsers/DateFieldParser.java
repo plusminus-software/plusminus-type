@@ -22,10 +22,9 @@ public class DateFieldParser implements FieldParser<DateField> {
         return dateField;
     }
 
-    @SuppressWarnings("PMD")
     private DateValidation getValidation(JavaField javaField) {
         DateValidation validation = new DateValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

@@ -48,6 +48,14 @@ public class TemporalFieldParsersTest {
     }
 
     @Test
+    public void datetimeParserSupportsSqlDateSubclasses() {
+        DatetimeFieldParser parser = new DatetimeFieldParser();
+
+        assertThat(parser.supports(javaField(java.sql.Timestamp.class))).isTrue();
+        assertThat(parser.supports(javaField(java.sql.Time.class))).isTrue();
+    }
+
+    @Test
     public void datetimeParserParsesDatetimeField() {
         DatetimeField field = new DatetimeFieldParser().parse(javaField(Instant.class));
 

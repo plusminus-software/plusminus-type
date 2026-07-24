@@ -99,6 +99,13 @@ public class ValueFieldParsersTest {
     }
 
     @Test
+    public void enumParserRejectsRawEnumType() {
+        EnumFieldParser parser = new EnumFieldParser();
+
+        assertThat(parser.supports(javaField(Enum.class))).isFalse();
+    }
+
+    @Test
     public void enumParserParsesEnumValues() {
         EnumField field = new EnumFieldParser().parse(javaField(TestEnum.class));
 

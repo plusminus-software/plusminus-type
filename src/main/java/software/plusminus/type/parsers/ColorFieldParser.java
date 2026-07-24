@@ -23,10 +23,10 @@ public class ColorFieldParser implements FieldParser<ColorField> {
         return colorField;
     }
 
-    @SuppressWarnings("PMD")
     private ColorValidation getValidation(JavaField javaField) {
         ColorValidation validation = new ColorValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
+        validation.setPattern(Validations.pattern(javaField));
         return validation;
     }
 }

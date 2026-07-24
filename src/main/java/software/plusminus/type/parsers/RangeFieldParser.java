@@ -20,10 +20,11 @@ public class RangeFieldParser implements FieldParser<RangeField> {
         return rangeField;
     }
 
-    @SuppressWarnings("PMD")
     private RangeValidation getValidation(JavaField javaField) {
         RangeValidation validation = new RangeValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
+        validation.setMin(Validations.numberMin(javaField));
+        validation.setMax(Validations.numberMax(javaField));
         return validation;
     }
 }

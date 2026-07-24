@@ -20,10 +20,9 @@ public class BooleanFieldParser implements FieldParser<BooleanField> {
         return booleanField;
     }
 
-    @SuppressWarnings("PMD")
     private BooleanValidation getValidation(JavaField javaField) {
         BooleanValidation validation = new BooleanValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

@@ -21,10 +21,11 @@ public class NumberFieldParser implements FieldParser<NumberField> {
         return numberField;
     }
 
-    @SuppressWarnings("PMD")
     private NumberValidation getValidation(JavaField javaField) {
         NumberValidation validation = new NumberValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
+        validation.setMin(Validations.numberMin(javaField));
+        validation.setMax(Validations.numberMax(javaField));
         return validation;
     }
 }

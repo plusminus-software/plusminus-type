@@ -25,10 +25,9 @@ public class FileFieldParser implements FieldParser<FileField> {
         return fileField;
     }
 
-    @SuppressWarnings("PMD")
     private FileValidation getValidation(JavaField javaField) {
         FileValidation validation = new FileValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

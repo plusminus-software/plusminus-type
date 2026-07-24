@@ -22,10 +22,9 @@ public class DatetimeLocalFieldParser implements FieldParser<DatetimeLocalField>
         return datetimeLocalField;
     }
 
-    @SuppressWarnings("PMD")
     private DatetimeLocalValidation getValidation(JavaField javaField) {
         DatetimeLocalValidation validation = new DatetimeLocalValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

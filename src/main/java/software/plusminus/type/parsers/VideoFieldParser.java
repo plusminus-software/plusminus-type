@@ -27,10 +27,9 @@ public class VideoFieldParser implements FieldParser<VideoField> {
         return videoField;
     }
 
-    @SuppressWarnings("PMD")
     private VideoValidation getValidation(JavaField javaField) {
         VideoValidation validation = new VideoValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

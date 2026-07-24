@@ -22,10 +22,9 @@ public class TimeFieldParser implements FieldParser<TimeField> {
         return timeField;
     }
 
-    @SuppressWarnings("PMD")
     private TimeValidation getValidation(JavaField javaField) {
         TimeValidation validation = new TimeValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }

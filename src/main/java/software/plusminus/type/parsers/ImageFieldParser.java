@@ -22,10 +22,9 @@ public class ImageFieldParser implements FieldParser<ImageField> {
         return imageField;
     }
 
-    @SuppressWarnings("PMD")
     private ImageValidation getValidation(JavaField javaField) {
         ImageValidation validation = new ImageValidation();
-        // TODO
+        validation.setRequired(Validations.isRequired(javaField));
         return validation;
     }
 }
